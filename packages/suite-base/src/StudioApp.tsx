@@ -29,6 +29,7 @@ import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
 import MultiProvider from "./components/MultiProvider";
 import PlayerManager from "./components/PlayerManager";
 import SendNotificationToastAdapter from "./components/SendNotificationToastAdapter";
+import { ServerResourcesInstaller } from "./components/ServerResourcesInstaller";
 import StudioToastProvider from "./components/StudioToastProvider";
 import { UserScriptStateProvider } from "./context/UserScriptStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
@@ -129,19 +130,22 @@ export function StudioApp(): React.JSX.Element {
         <DndProvider backend={HTML5Backend}>
           <Suspense fallback={<></>}>
             <PanelCatalogProvider>
-              <Workspace
-                deepLinks={deepLinks}
-                appBarLeftInset={appBarLeftInset}
-                onAppBarDoubleClick={onAppBarDoubleClick}
-                showCustomWindowControls={customWindowControlProps?.showCustomWindowControls}
-                isMaximized={customWindowControlProps?.isMaximized}
-                initialZoomFactor={customWindowControlProps?.initialZoomFactor}
-                onMinimizeWindow={customWindowControlProps?.onMinimizeWindow}
-                onMaximizeWindow={customWindowControlProps?.onMaximizeWindow}
-                onUnmaximizeWindow={customWindowControlProps?.onUnmaximizeWindow}
-                onCloseWindow={customWindowControlProps?.onCloseWindow}
-                AppBarComponent={AppBarComponent}
-              />
+              <>
+                <ServerResourcesInstaller />
+                <Workspace
+                  deepLinks={deepLinks}
+                  appBarLeftInset={appBarLeftInset}
+                  onAppBarDoubleClick={onAppBarDoubleClick}
+                  showCustomWindowControls={customWindowControlProps?.showCustomWindowControls}
+                  isMaximized={customWindowControlProps?.isMaximized}
+                  initialZoomFactor={customWindowControlProps?.initialZoomFactor}
+                  onMinimizeWindow={customWindowControlProps?.onMinimizeWindow}
+                  onMaximizeWindow={customWindowControlProps?.onMaximizeWindow}
+                  onUnmaximizeWindow={customWindowControlProps?.onUnmaximizeWindow}
+                  onCloseWindow={customWindowControlProps?.onCloseWindow}
+                  AppBarComponent={AppBarComponent}
+                />
+              </>
             </PanelCatalogProvider>
           </Suspense>
         </DndProvider>

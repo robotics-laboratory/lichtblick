@@ -43,6 +43,7 @@ import { emitBusyStatus } from "./utils/emitBusyStatus.decorator";
 const log = Logger.getLogger(__filename);
 
 export type SaveNewLayout = {
+  id?: LayoutID;
   name: string;
   data: LayoutData;
   permission: LayoutPermission;
@@ -179,6 +180,7 @@ export default class LayoutManager implements ILayoutManager {
 
   @emitBusyStatus
   public async saveNewLayout({
+    id,
     name,
     data: unmigratedData,
     permission,
@@ -218,7 +220,7 @@ export default class LayoutManager implements ILayoutManager {
     const newLayout = await this.local.runExclusive(
       async (local) =>
         await local.put({
-          id: uuidv4() as LayoutID,
+          id: id ?? (uuidv4() as LayoutID),
           name,
           from,
           permission,

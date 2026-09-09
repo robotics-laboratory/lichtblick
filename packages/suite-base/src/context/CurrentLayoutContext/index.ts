@@ -93,7 +93,7 @@ export interface ICurrentLayout {
      * asynchronously and don't want to update every time the state changes.
      */
     getCurrentLayoutState: () => LayoutState;
-    setSelectedLayoutId: (id: LayoutID | undefined) => void;
+    setSelectedLayoutId: (id: LayoutID | undefined, options?: { saveToProfile?: boolean }) => void;
 
     /**
      * Update the transient state associated with a particular panel type.

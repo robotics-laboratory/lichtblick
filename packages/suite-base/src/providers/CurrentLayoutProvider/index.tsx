@@ -54,12 +54,20 @@ import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { LayoutLoader } from "@lichtblick/suite-base/services/ILayoutLoader";
 import { LayoutManagerEventTypes } from "@lichtblick/suite-base/services/ILayoutManager";
 import { PanelConfig, PlaybackConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
-import { windowAppURLState } from "@lichtblick/suite-base/util/appURLState";
+import { updateAppURLState, windowAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
 import { IncompatibleLayoutVersionAlert } from "./IncompatibleLayoutVersionAlert";
 
 const log = Logger.getLogger(__filename);
+
+function updateLayoutIdInURL(id: LayoutID | undefined): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const newURL = updateAppURLState(new URL(window.location.href), { layoutId: id });
+  window.history.replaceState(undefined, "", newURL.href);
+}
 
 /**
  * Concrete implementation of CurrentLayoutContext.Provider which handles
@@ -143,6 +151,7 @@ export default function CurrentLayoutProvider({
       { saveToProfile = true }: { saveToProfile?: boolean } = {},
     ) => {
       if (id == undefined) {
+        updateLayoutIdInURL(undefined);
         setLayoutState({ selectedLayout: undefined });
         return;
       }
@@ -151,6 +160,7 @@ export default function CurrentLayoutProvider({
         const layout = await layoutManager.getLayout(id);
         const layoutVersion = layout?.baseline.data.version;
         if (layoutVersion != undefined && layoutVersion > MAX_SUPPORTED_LAYOUT_VERSION) {
+          updateLayoutIdInURL(undefined);
           setIncompatibleLayoutVersionError(true);
           setLayoutState({ selectedLayout: undefined });
           return;
@@ -160,8 +170,10 @@ export default function CurrentLayoutProvider({
         }
         setIncompatibleLayoutVersionError(false);
         if (layout == undefined) {
+          updateLayoutIdInURL(undefined);
           setLayoutState({ selectedLayout: undefined });
         } else {
+          updateLayoutIdInURL(layout.from != undefined ? layout.id : undefined);
           setLayoutState({
             selectedLayout: {
               loading: false,
@@ -183,6 +195,7 @@ export default function CurrentLayoutProvider({
           }
         }
       } catch (error) {
+        updateLayoutIdInURL(undefined);
         console.error(error);
         enqueueSnackbar(`The layout could not be loaded. ${error.toString()}`, {
           variant: "error",

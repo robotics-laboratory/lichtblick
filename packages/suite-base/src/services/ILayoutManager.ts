@@ -78,9 +78,11 @@ export interface ILayoutManager {
   getLayout(id: LayoutID): Promise<Layout | undefined>;
 
   saveNewLayout(params: {
+    id?: LayoutID;
     name: string;
     data: LayoutData;
     permission: LayoutPermission;
+    from?: string;
   }): Promise<Layout>;
 
   /**
