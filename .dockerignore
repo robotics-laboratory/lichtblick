@@ -6,5 +6,7 @@
 .caddy-data/
 .tls/
 dist/
+tmp/
 node_modules/
 Dockerfile
+docker-compose.yaml

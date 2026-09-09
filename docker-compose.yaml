@@ -1,0 +1,8 @@
+services:
+  lichtblick:
+    image: lichtblick:latest
+    build: .
+    ports: [8080:8080]
+    volumes:
+      - ./tmp/extensions:/src/remote-extensions:ro
+      - ./tmp/layouts:/src/remote-layouts:ro
