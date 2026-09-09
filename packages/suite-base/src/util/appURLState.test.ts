@@ -139,6 +139,13 @@ describe("app state url parser", () => {
       });
     });
 
+    it("parses layoutId from URL", () => {
+      const url = urlBuilder();
+      url.searchParams.append("layoutId", "id1");
+
+      expect(parseAppURLState(url)).toMatchObject({ layoutId: "id1" });
+    });
+
     it("parses both ds and layoutUrl from URL", () => {
       const url = urlBuilder();
       url.searchParams.append("ds", "ros1-remote-bagfile");
@@ -277,6 +284,14 @@ describe("updateAppURLState", () => {
     urlWithLayout.searchParams.set("layoutUrl", "http://example.com/layout.json");
     const updated = updateAppURLState(urlWithLayout, { layoutUrl: undefined });
     expect(updated.searchParams.has("layoutUrl")).toBe(false);
+  });
+
+  it("encodes and removes layoutId", () => {
+    const withLayoutId = updateAppURLState(baseURL, { layoutId: "id1" as AppURLState["layoutId"] });
+    expect(withLayoutId.searchParams.get("layoutId")).toBe("id1");
+
+    const withoutLayoutId = updateAppURLState(withLayoutId, { layoutId: undefined });
+    expect(withoutLayoutId.searchParams.has("layoutId")).toBe(false);
   });
 
   describe("url states", () => {

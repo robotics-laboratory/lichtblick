@@ -373,4 +373,18 @@ export default [
       "@lichtblick/license-header": "off",
     },
   },
+
+  // serverExtensions: no license header required
+  {
+    files: [
+      "packages/suite-base/src/components/ServerResourcesInstaller.tsx",
+      "packages/suite-base/src/util/serverExtensions.test.ts",
+      "packages/suite-base/src/util/serverExtensions.ts",
+      "packages/suite-base/src/util/serverLayouts.test.ts",
+      "packages/suite-base/src/util/serverLayouts.ts",
+    ],
+    rules: {
+      "@lichtblick/license-header": "off",
+    },
+  },
 ];

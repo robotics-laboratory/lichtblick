@@ -57,6 +57,14 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
     }
   }
 
+  if ("layoutId" in urlState) {
+    if (urlState.layoutId) {
+      newURL.searchParams.set("layoutId", urlState.layoutId);
+    } else {
+      newURL.searchParams.delete("layoutId");
+    }
+  }
+
   if (urlState.dsParams || urlState.dsParamsArray) {
     [...newURL.searchParams].forEach(([k]) => {
       if (k.startsWith("ds.")) {
@@ -89,6 +97,7 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
 export function parseAppURLState(url: URL): AppURLState | undefined {
   const ds = url.searchParams.get("ds") ?? undefined;
   const layoutUrl = url.searchParams.get("layoutUrl");
+  const layoutId = (url.searchParams.get("layoutId") ?? undefined) as LayoutID | undefined;
   const sessionId = url.searchParams.get("sessionid") ?? undefined;
   const timeString = url.searchParams.get("time");
   const time = parseTimeUrlString(timeString ?? undefined);
@@ -111,6 +120,7 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
       time,
       ds,
       layoutUrl,
+      layoutId,
       sessionId,
       dsParams: _.isEmpty(dsParams) ? undefined : dsParams,
     },

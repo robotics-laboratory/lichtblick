@@ -4,7 +4,10 @@
 
 import { act, renderHook } from "@testing-library/react";
 
-import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import {
+  LayoutID,
+  useCurrentLayoutActions,
+} from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import * as filePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
@@ -131,6 +134,30 @@ describe("useLayoutTransfer", () => {
       { variant: "error" },
     );
     expect(saveNewLayoutMock).not.toHaveBeenCalled();
+    expect(onSelectLayoutMock).not.toHaveBeenCalled();
+  });
+
+  it("installs a server layout with its ID without selecting it", async () => {
+    const content = JSON.stringify(LayoutBuilder.data()) ?? "";
+    const mockFile = new File([content], "[Server] Demo.json", {
+      type: "application/json",
+    });
+    mockFile.text = async () => content;
+    saveNewLayoutMock.mockResolvedValue({ id: "id1", name: "[Server] Demo" });
+
+    const { result } = renderHook(() => useLayoutTransfer());
+
+    await act(async () => {
+      await result.current.parseAndInstallLayout(mockFile, "local", {
+        id: "id1" as LayoutID,
+        from: "layouts/Demo.json",
+        select: false,
+      });
+    });
+
+    expect(saveNewLayoutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "id1", from: "layouts/Demo.json" }),
+    );
     expect(onSelectLayoutMock).not.toHaveBeenCalled();
   });
 });

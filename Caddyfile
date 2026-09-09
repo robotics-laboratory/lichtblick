@@ -1,0 +1,32 @@
+:8080 {
+	handle /remote-extensions.list {
+		rewrite * /extensions.list
+		reverse_proxy https://foxglove-ssl.robotics-lab.ru {
+			header_up Host foxglove-ssl.robotics-lab.ru
+		}
+	}
+
+	handle_path /remote-extensions/* {
+		reverse_proxy https://foxglove-ssl.robotics-lab.ru {
+			header_up Host foxglove-ssl.robotics-lab.ru
+		}
+	}
+
+	handle /remote-layouts.list {
+		rewrite * /layouts.list
+		reverse_proxy https://foxglove-ssl.robotics-lab.ru {
+			header_up Host foxglove-ssl.robotics-lab.ru
+		}
+	}
+
+	handle_path /remote-layouts/* {
+		reverse_proxy https://foxglove-ssl.robotics-lab.ru {
+			header_up Host foxglove-ssl.robotics-lab.ru
+		}
+	}
+
+	handle {
+		root * /src
+		file_server
+	}
+}

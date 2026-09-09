@@ -368,6 +368,28 @@ describe("LayoutManager", () => {
       expect(mockRemoteStorage.saveNewLayout).not.toHaveBeenCalled();
     });
 
+    it("should preserve an explicitly supplied local layout ID and source", async () => {
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: undefined,
+      });
+      const id = "id1" as LayoutID;
+      const putSpy = jest.spyOn(mockLocalStorage, "put");
+
+      await layoutManager.saveNewLayout({
+        id,
+        name: "Server layout",
+        data: LayoutBuilder.data(),
+        permission: "CREATOR_WRITE",
+        from: "layouts/server.json",
+      });
+
+      expect(putSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ id, from: "layouts/server.json" }),
+      );
+    });
+
     it("should save new personal layout locally and remotelly", async () => {
       // Given
       const layoutManager = new LayoutManager({

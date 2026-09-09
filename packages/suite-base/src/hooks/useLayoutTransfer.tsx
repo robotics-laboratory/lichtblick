@@ -8,6 +8,7 @@ import { useMountedState } from "react-use";
 
 import {
   LayoutData,
+  LayoutID,
   useCurrentLayoutActions,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
@@ -25,7 +26,16 @@ import { AppEvent } from "../services/IAnalytics";
 type UseLayoutTransfer = {
   importLayout: () => Promise<void>;
   exportLayout: () => Promise<void>;
-  parseAndInstallLayout: (file: File, namespace: Namespace) => Promise<Layout | undefined>;
+  parseAndInstallLayout: (
+    file: File,
+    namespace?: Namespace,
+    options?: {
+      replaceExisting?: boolean;
+      select?: boolean;
+      id?: LayoutID;
+      from?: string;
+    },
+  ) => Promise<Layout | undefined>;
 };
 
 export function useLayoutTransfer(): UseLayoutTransfer {
@@ -36,7 +46,16 @@ export function useLayoutTransfer(): UseLayoutTransfer {
   const { getCurrentLayoutState } = useCurrentLayoutActions();
 
   const parseAndInstallLayout = useCallback(
-    async (file: File, namespace: Namespace = "local") => {
+    async (
+      file: File,
+      namespace: Namespace = "local",
+      options: {
+        replaceExisting?: boolean;
+        select?: boolean;
+        id?: LayoutID;
+        from?: string;
+      } = {},
+    ) => {
       const layoutName = path.basename(file.name, path.extname(file.name));
       const content = await file.text();
 
@@ -70,13 +89,37 @@ export function useLayoutTransfer(): UseLayoutTransfer {
         return;
       }
 
-      const newLayout = await layoutManager.saveNewLayout({
-        name: layoutName,
-        data,
-        permission: namespace === "org" ? "ORG_WRITE" : "CREATOR_WRITE",
-      });
+      const existingLayouts =
+        options.replaceExisting === true ? await layoutManager.getLayouts() : [];
+      const existingById = options.id
+        ? existingLayouts.find((layout) => layout.id === options.id)
+        : undefined;
 
-      void onSelectLayout(newLayout);
+      if (options.id != undefined) {
+        for (const layout of existingLayouts) {
+          const isSameImportedLayout = options.from
+            ? layout.from === options.from
+            : layout.name === layoutName;
+          if (isSameImportedLayout && layout.id !== options.id) {
+            await layoutManager.deleteLayout({ id: layout.id });
+          }
+        }
+      }
+
+      const newLayout =
+        existingById != undefined
+          ? await layoutManager.updateLayout({ id: existingById.id, name: layoutName, data })
+          : await layoutManager.saveNewLayout({
+              id: options.id,
+              name: layoutName,
+              data,
+              permission: namespace === "org" ? "ORG_WRITE" : "CREATOR_WRITE",
+              from: options.from,
+            });
+
+      if (options.select !== false) {
+        void onSelectLayout(newLayout);
+      }
 
       return newLayout;
     },
