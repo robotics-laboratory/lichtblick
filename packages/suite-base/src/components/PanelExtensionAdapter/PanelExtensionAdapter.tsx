@@ -696,6 +696,13 @@ function PanelExtensionAdapter(
         return subscribeMessageRange(args);
       },
 
+      async getMessageAtTime(topic: string, time: Time) {
+        if (!isMounted()) {
+          return undefined;
+        }
+        return await getMessagePipelineContext().getMessageAtTime(topic, time);
+      },
+
       unstable_setMessagePathDropConfig(dropConfig) {
         setMessagePathDropConfig(dropConfig);
       },
@@ -806,18 +813,38 @@ function PanelExtensionAdapter(
     panelContainerRef.current.appendChild(panelElement);
 
     log.info(`Init panel ${panelId}`);
+    let active = true;
     const onUnmount = initPanel({
       panelElement,
       ...partialExtensionContext,
 
+      // An old instance must not replace the subscriptions\render callback of its replacement.
+      subscribe: (topics) => {
+        if (active) {
+          partialExtensionContext.subscribe(
+            topics.map((topic) =>
+              typeof topic === "string" ? { topic, preload: true } : topic,
+            ),
+          );
+        }
+      },
+      unsubscribeAll: () => {
+        if (active) {
+          partialExtensionContext.unsubscribeAll();
+        }
+      },
+
       // eslint-disable-next-line no-restricted-syntax
       set onRender(renderFunction: RenderFn | undefined) {
-        setRenderFn(() => renderFunction);
+        if (active) {
+          setRenderFn(() => renderFunction);
+        }
       },
     });
     isPanelInitializedRef.current = true;
 
     return () => {
+      active = false;
       if (onUnmount) {
         onUnmount();
       }
