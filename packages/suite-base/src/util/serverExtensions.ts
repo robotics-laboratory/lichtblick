@@ -13,7 +13,7 @@ const EXTENSIONS_LIST_URL = "/remote-extensions.list";
 const EXTENSIONS_URL_PREFIX = "/remote-extensions/";
 
 export async function getServerExtensionArtifacts(): Promise<ServerExtensionArtifact[]> {
-  const response = await fetch(EXTENSIONS_LIST_URL);
+  const response = await fetch(EXTENSIONS_LIST_URL, { cache: "no-cache" });
   if (!response.ok) {
     throw new Error(`${EXTENSIONS_LIST_URL}: status ${response.status}`);
   }

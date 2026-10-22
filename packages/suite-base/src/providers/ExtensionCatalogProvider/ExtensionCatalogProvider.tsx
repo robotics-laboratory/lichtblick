@@ -63,7 +63,7 @@ function createExtensionRegistryStore(
     };
 
     const downloadExtension = async (url: string) => {
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: "no-cache" });
       return new Uint8Array(await res.arrayBuffer());
     };
 
