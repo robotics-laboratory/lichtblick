@@ -26,8 +26,6 @@ import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
-import { canInstallExtension } from "@lichtblick/suite-base/util/canInstallExtension";
-import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 export default function ExtensionList({
   namespace,
@@ -184,11 +182,6 @@ export default function ExtensionList({
             columns={columns}
             initialState={{
               pagination: { paginationModel },
-              columns: {
-                columnVisibilityModel: {
-                  actions: isDesktopApp() || !entries.some((entry) => canInstallExtension(entry)),
-                },
-              },
             }}
             pageSizeOptions={[5, 10, 20]}
             checkboxSelection

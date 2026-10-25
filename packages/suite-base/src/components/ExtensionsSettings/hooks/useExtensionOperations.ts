@@ -14,7 +14,6 @@ import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
-import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 /**
  * Custom hook for handling extension install/uninstall operations.
@@ -37,13 +36,6 @@ export function useExtensionOperations(
 
   const handleInstall = useCallback(
     async (extension: Immutable<ExtensionMarketplaceDetail>) => {
-      if (!isDesktopApp()) {
-        enqueueSnackbar("Download the desktop app to use marketplace extensions.", {
-          variant: "error",
-        });
-        return;
-      }
-
       const url = extension.foxe;
       if (url == undefined) {
         enqueueSnackbar(`Cannot install extension ${extension.id}, "foxe" URL is missing`, {
@@ -57,7 +49,10 @@ export function useExtensionOperations(
 
       try {
         const extensionBuffer = await downloadExtension(url);
-        await installExtensions("local", [{ buffer: extensionBuffer }]);
+        const [result] = await installExtensions("local", [{ buffer: extensionBuffer }]);
+        if (!result?.success) {
+          throw new Error(`Failed to install extension ${extension.name}`);
+        }
         enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
         analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
         onInstallSuccess?.(extension.id);
