@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 export const extensionsSettings = {
+  installFromFile: "Install from file…",
+  installing: "Installing…",
+  installationSucceeded: "Installed extension {{name}}",
+  installationFailed: "Failed to install extension {{name}}",
   noExtensionsFound: "No extensions found",
   noExtensionsAvailable: "No extensions available",
   failedToRetrieveMarketplaceExtensions:

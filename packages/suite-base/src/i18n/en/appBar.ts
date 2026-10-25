@@ -33,6 +33,7 @@ export const appBar = {
   showRightSidebar: "Show right sidebar",
   signIn: "Sign in",
   signOut: "Sign out",
+  toggleFullscreen: "Toggle fullscreen",
   unknown: "unknown",
   userProfile: "User profile",
   view: "View",

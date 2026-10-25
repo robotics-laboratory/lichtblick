@@ -5,8 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
 import { Alert, AlertTitle, Button } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useSnackbar } from "notistack";
+import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails";
@@ -14,6 +16,7 @@ import useExtensionSettings from "@lichtblick/suite-base/components/ExtensionsSe
 import { FocusedExtension } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import SearchBar from "@lichtblick/suite-base/components/SearchBar/SearchBar";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 
 import ExtensionList from "./components/ExtensionList/ExtensionList";
 import { useStyles } from "./index.style";
@@ -21,6 +24,10 @@ import { useStyles } from "./index.style";
 export default function ExtensionsSettings(): React.ReactElement {
   const { t } = useTranslation("extensionsSettings");
   const { classes } = useStyles();
+  const fileInputRef = useRef<HTMLInputElement>(ReactNull);
+  const [isInstalling, setIsInstalling] = useState(false);
+  const installExtensions = useExtensionCatalog((state) => state.installExtensions);
+  const { enqueueSnackbar } = useSnackbar();
 
   const [focusedExtension, setFocusedExtension] = useState<FocusedExtension | undefined>();
 
@@ -59,6 +66,44 @@ export default function ExtensionsSettings(): React.ReactElement {
 
   return (
     <Stack gap={1}>
+      <Button
+        startIcon={<FileUploadRoundedIcon />}
+        disabled={isInstalling}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {t(isInstalling ? "installing" : "installFromFile")}
+      </Button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".foxe"
+        hidden
+        onChange={async (event) => {
+          const file = event.currentTarget.files?.[0];
+          event.currentTarget.value = "";
+          if (!file) {
+            return;
+          }
+          setIsInstalling(true);
+          try {
+            const buffer = new Uint8Array(await file.arrayBuffer());
+            const [result] = await installExtensions("local", [{ buffer, file }]);
+            if (!result?.success) {
+              throw new Error(t("installationFailed", { name: file.name }));
+            }
+            enqueueSnackbar(
+              t("installationSucceeded", { name: result.extensionName ?? file.name }),
+              { variant: "success" },
+            );
+          } catch (error) {
+            enqueueSnackbar(error instanceof Error ? error.message : String(error), {
+              variant: "error",
+            });
+          } finally {
+            setIsInstalling(false);
+          }
+        }}
+      />
       {marketplaceEntries.error && (
         <Alert
           severity="error"
