@@ -13,6 +13,7 @@ import {
   PanelRight24Regular,
   SlideAdd24Regular,
 } from "@fluentui/react-icons";
+import AspectRatioIcon from "@mui/icons-material/AspectRatioRounded";
 import { Avatar, IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -44,6 +45,14 @@ import { CustomWindowControls, CustomWindowControlsProps } from "./CustomWindowC
 import { DataSource } from "./DataSource";
 import { NetworkStatusIndicator } from "./NetworkStatusIndicator";
 import { SettingsMenu } from "./SettingsMenu";
+
+function toggleFullScreen() {
+  if (!document.fullscreenElement) {
+    void document.documentElement.requestFullscreen();
+  } else if (document.exitFullscreen) {
+    void document.exitFullscreen();
+  }
+}
 
 const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()(
   (theme, { debugDragRegion = false }, classes) => {
@@ -260,6 +269,14 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
               <NetworkStatusIndicator />
               {enableMemoryUseIndicator && <MemoryUseIndicator />}
               {appBarLayoutButton}
+              <AppBarIconButton
+                id="fullscreen-toggle"
+                title={t("toggleFullscreen")}
+                aria-label={t("toggleFullscreen")}
+                onClick={toggleFullScreen}
+              >
+                <AspectRatioIcon />
+              </AppBarIconButton>
               <Stack direction="row" alignItems="center" data-tourid="sidebar-button-group">
                 <AppBarIconButton
                   title={
